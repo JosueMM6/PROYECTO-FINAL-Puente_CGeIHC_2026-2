@@ -86,6 +86,7 @@ glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
 glm::vec3 ambientColor = diffuseColor * glm::vec3(0.75f);
 
 // posiciones
+int estadoC1_walking = 0;
 float	movAuto_x = 0.0f,
 movAuto_z = 0.0f,
 orienta = 90.0f;
@@ -122,7 +123,12 @@ movS2 = 0.0f,
 movS3 = 0.0f;
 bool	aniRocket = false;
 
-
+//-----------------------------------------------------------------------------------------------------
+// Personaje de Fondo - C1 Walking
+//-----------------------------------------------------------------------------------------------------
+float movC1_x = -128.0f,
+	movC1_y = 58.0f,
+	movC1_z = -100.0f;
 
 
 float	incX = 0.0f,
@@ -312,10 +318,17 @@ void animate(void)
 
 	}
 
-	//Vehículo
-	if (animacion)
-	{
-		movAuto_x += 3.0f;
+
+	//-----------------------------------------------------------------------------------------------------
+	// Personaje de Fondo - C1 Walking
+	//-----------------------------------------------------------------------------------------------------
+	if (animacion) {
+		if (estadoC1_walking == 1) // Retrocede hasta -200 en x
+		{
+			movC1_z += 1.0f;
+			if (movC1_z > 300.0f)
+				estadoC1_walking = 0;
+		}
 	}
 
 	//-----------------------------------------------------------------------------------------------------
@@ -575,6 +588,18 @@ int main() {
 	ModelAnim animacionPersonaje("resources/objects/Personaje1/Arm.dae");
 	animacionPersonaje.initShaders(animShader.ID);
 
+
+	//-----------------------------------------------------------------------------------------------------
+	// Personajes de fondo
+	//-----------------------------------------------------------------------------------------------------
+	ModelAnim C1_Walking("resources/objects/PersonajesFondo/C1_Walking/C1_Walking.dae");
+	C1_Walking.initShaders(animShader.ID);
+
+	ModelAnim C2_LeftStrafeWalking("resources/objects/PersonajesFondo/C2_LeftStrafeWalking/C2_LeftStrafeWalking.dae");
+	C2_LeftStrafeWalking.initShaders(animShader.ID);
+
+
+
 	Model drone("resources/objects/Drone/Drone_v1.obj");
 
 	//-----------------------------------------------------------------------------------------------------
@@ -739,8 +764,12 @@ int main() {
 		animacionPersonaje.Draw(animShader);
 
 		// -------------------------------------------------------------------------------------------------------------------------
-		// Segundo Personaje Animacion
+		// C1 wey caminando en linea recta
 		// -------------------------------------------------------------------------------------------------------------------------
+		modelOp = glm::translate(glm::mat4(1.0f), glm::vec3(movC1_x, movC1_y, movC1_z));
+		modelOp = glm::scale(modelOp, glm::vec3(0.07f));	// it's a bit too big for our scene, so scale it down
+		animShader.setMat4("model", modelOp);
+		C1_Walking.Draw(animShader);
 
 
 
@@ -910,28 +939,18 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
 		lightPosition.x--;
 
-	//Animación cabeza de Aquaman
-	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
-		giroCabeza++;
-	if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
-		giroCabeza--;
+	//Animación wey camminando C1_walking
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+		animacion ^= true;
+		estadoC1_walking = 1;
+	}
 
-	//Animación brazo derecho de Aquaman
-	if (glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS)
-		giroBrazoDer++;
-	if (glfwGetKey(window, GLFW_KEY_F4) == GLFW_PRESS)
-		giroBrazoDer--;
-
-	//Animación brazo derecho de Aquaman
-	if (glfwGetKey(window, GLFW_KEY_F5) == GLFW_PRESS)
-		giroPiernaDer++;
-	if (glfwGetKey(window, GLFW_KEY_F6) == GLFW_PRESS)
-		giroPiernaDer--;
-
-	if (glfwGetKey(window, GLFW_KEY_F7) == GLFW_PRESS)
-		posY++;
-	if (glfwGetKey(window, GLFW_KEY_F8) == GLFW_PRESS)
-		posY--;
+	//Animación wey camminando C1_walking RESET
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+		animacion ^= true;
+		estadoC1_walking = 0;
+		movC1_z = 0.0f;
+	}
 
 	//Car animation
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
@@ -1009,7 +1028,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		lastY = ypos;
 		firstMouse = false;
 	}
-
+	
 	double xoffset = xpos - lastX;
 	double yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
