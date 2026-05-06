@@ -126,9 +126,18 @@ bool	aniRocket = false;
 //-----------------------------------------------------------------------------------------------------
 // Personaje de Fondo - C1 Walking
 //-----------------------------------------------------------------------------------------------------
-float movC1_x = -128.0f,
+float movC1_x = -300.0f,
 	movC1_y = 58.0f,
-	movC1_z = -100.0f;
+	movC1_z = -135.0f;
+float orientaC1 = 90.0f; // Ángulo inicial del personaje
+
+//-----------------------------------------------------------------------------------------------------
+// Personaje de Fondo - C6 Fist Fight A
+//-----------------------------------------------------------------------------------------------------
+float movC6_x = -245.0f,
+movC6_y = 0.0f,
+movC6_z = -50.0f;
+float orientaC6 = 90.0f; // Ángulo inicial del personaje
 
 
 float	incX = 0.0f,
@@ -323,10 +332,23 @@ void animate(void)
 	// Personaje de Fondo - C1 Walking
 	//-----------------------------------------------------------------------------------------------------
 	if (animacion) {
+		
 		if (estadoC1_walking == 1) // Retrocede hasta -200 en x
 		{
+			movC1_x += 1.0f;
+			if (movC1_x > -130.0f)
+				estadoC1_walking = 2;
+		}if (estadoC1_walking == 2) // Retrocede hasta -200 en x
+		{
 			movC1_z += 1.0f;
-			if (movC1_z > 300.0f)
+			orientaC1 = 0.0f; // Giro de 90 grados sobre eje Y
+			if (movC1_z > 280.0f)
+				estadoC1_walking = 3;
+		}if (estadoC1_walking == 3) // Retrocede hasta -200 en x
+		{
+			movC1_x += 1.0f;
+			orientaC1 = 90.0f; // Giro de 90 grados sobre eje Y
+			if (movC1_x > -100.0f)
 				estadoC1_walking = 0;
 		}
 	}
@@ -595,8 +617,13 @@ int main() {
 	ModelAnim C1_Walking("resources/objects/PersonajesFondo/C1_Walking/C1_Walking.dae");
 	C1_Walking.initShaders(animShader.ID);
 
-	ModelAnim C2_LeftStrafeWalking("resources/objects/PersonajesFondo/C2_LeftStrafeWalking/C2_LeftStrafeWalking.dae");
-	C2_LeftStrafeWalking.initShaders(animShader.ID);
+	// "Botargas" chistosas
+	ModelAnim C6_FistFightA("resources/objects/PersonajesFondo/C6_FistFightA/C6_FistFightA.dae");
+	C6_FistFightA.initShaders(animShader.ID);
+
+	ModelAnim C7_Backflip("resources/objects/PersonajesFondo/C7_Backflip/C7_Backflip.dae");
+	C7_Backflip.initShaders(animShader.ID);
+
 
 
 
@@ -767,10 +794,20 @@ int main() {
 		// C1 wey caminando en linea recta
 		// -------------------------------------------------------------------------------------------------------------------------
 		modelOp = glm::translate(glm::mat4(1.0f), glm::vec3(movC1_x, movC1_y, movC1_z));
+		modelOp = glm::rotate(modelOp, glm::radians(orientaC1), glm::vec3(0.0f, 1.0f, 0.0f)); // Aplicamos el giro
 		modelOp = glm::scale(modelOp, glm::vec3(0.07f));	// it's a bit too big for our scene, so scale it down
 		animShader.setMat4("model", modelOp);
 		C1_Walking.Draw(animShader);
 
+		//BOTARGAS CHISTOSAS
+		// ------------------------------------------------------------------------------------------------------------------------ -
+		// C6 wey golpeando
+		// -------------------------------------------------------------------------------------------------------------------------
+		modelOp = glm::translate(glm::mat4(1.0f), glm::vec3(movC6_x, movC6_y, movC6_z));
+		modelOp = glm::rotate(modelOp, glm::radians(orientaC6), glm::vec3(0.0f, 1.0f, 0.0f)); // Aplicamos el giro
+		modelOp = glm::scale(modelOp, glm::vec3(0.07f));	// it's a bit too big for our scene, so scale it down
+		animShader.setMat4("model", modelOp);
+		C6_FistFightA.Draw(animShader);
 
 
 
@@ -945,11 +982,14 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 		estadoC1_walking = 1;
 	}
 
-	//Animación wey camminando C1_walking RESET
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+		//Animación wey camminando C1_walking RESET
 		animacion ^= true;
 		estadoC1_walking = 0;
-		movC1_z = 0.0f;
+		movC1_x = -300.0f;
+		movC1_z = -135.0f;
+		orientaC1 = 90.0f;
+
 	}
 
 	//Car animation
