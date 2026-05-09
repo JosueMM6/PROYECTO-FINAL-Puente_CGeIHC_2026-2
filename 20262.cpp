@@ -110,18 +110,46 @@ giroPiernaDer = 0.0f,
 giroPiernaIzq = 0.0f;
 
 //-----------------------------------------------------------------------------------------------------
+// PF - Robotic Arm
+//-----------------------------------------------------------------------------------------------------
+int stateArm = 0;
+float	turnBody = 0.0f,
+		movBody_x = 0.0f,
+		movBody_y = 0.0f,
+		movBody_z = 0.0f,
+		movUpper_y = 0.0f,
+		movFore_y = 0.0f,
+		movHandU_y = 0.0f,
+		movHandL_y = 0.0f;
+bool	aniRobotic = false;
+
+//-----------------------------------------------------------------------------------------------------
 // PF - Rocket
 //-----------------------------------------------------------------------------------------------------
 int stateRocket = 0;
 float	turnRocket = 0.0f,
-turnBase = 0.0f,
-movRocket_x = 0.0f,
-movRocket_y = 0.0f,
-movRocket_z = 0.0f,
-movS1 = 0.0f,
-movS2 = 0.0f,
-movS3 = 0.0f;
+		turnBase = 0.0f,
+		movRocket_x = 0.0f,
+		movRocket_y = 0.0f,
+		movRocket_z = 0.0f,
+		movS1 = 0.0f,
+		movS2 = 0.0f,
+		movS3 = 0.0f;
 bool	aniRocket = false;
+
+//-----------------------------------------------------------------------------------------------------
+// PF - Paper
+//-----------------------------------------------------------------------------------------------------
+int statePaper = 0;
+float	turnP_x = 0.0f,
+		turnP_y = 0.0f,
+		turnP_z = 0.0f,
+		movP_x = -20.0f,
+		movP_y = 9.0f,
+		movP_z = 3.0f,
+		movWL = 0.0f,
+		movWR = 0.0f;
+bool	aniPaper = false;
 
 //-----------------------------------------------------------------------------------------------------
 // Personaje de Fondo - C1 Walking
@@ -358,6 +386,91 @@ void animate(void)
 	}
 
 	//-----------------------------------------------------------------------------------------------------
+// PF - Robotic Arm
+//-----------------------------------------------------------------------------------------------------
+	if (aniRobotic)
+	{
+		if (stateArm == 1) { //Avanza frente
+			movBody_z += 0.5f;
+			if (movBody_z > 200.0f) {
+				stateArm = 2;
+			}
+		}
+		else if (stateArm == 2) { //Gira 90
+			turnBody += 0.35f;
+			if (turnBody > 90.0f) {
+				stateArm = 3;
+			}
+		}
+		else if (stateArm == 3) { //Avanza frente
+			movBody_x += 0.5f;
+			if (movBody_x > 120.0f) {
+				stateArm = 4;
+			}
+		}
+		else if (stateArm == 4) { //Gira 160
+			turnBody += 0.35f;
+			if (turnBody > 160.0f) {
+				stateArm = 5;
+			}
+		}
+		else if (stateArm == 5) { //Baja el brazo
+			movUpper_y += 0.35f;
+			if (movUpper_y > 50.0f) {
+				stateArm = 6;
+			}
+		}
+		else if (stateArm == 6) { //Sube el antebrazo
+			movFore_y += 0.35f;
+			if (movFore_y > 40.0f) {
+				stateArm = 7;
+			}
+		}
+		else if (stateArm == 7) { //Baja mano superior
+			movHandU_y += 0.35f;
+			if (movHandU_y > 13.0f) {
+				stateArm = 8;
+			}
+		}
+		else if (stateArm == 8) { //Sube mano inferior
+			movHandL_y += 0.35f;
+			if (movHandL_y > 13.0f) {
+				stateArm = 9;
+			}
+		}
+		else if (stateArm == 9) { //Sube mano superior
+			movHandU_y -= 0.35f;
+			if (movHandU_y < -11.0f) {
+				stateArm = 10;
+			}
+		}
+		else if (stateArm == 10) { //Baja mano inferior
+			movHandL_y -= 0.35f;
+			if (movHandL_y < -11.0f) {
+				stateArm = 11;
+			}
+		}
+		else if (stateArm == 11) { //Baja el antebrazo
+			movFore_y -= 0.35f;
+			if (movFore_y < -30.0f) {
+				stateArm = 12;
+			}
+		}
+		else if (stateArm == 12) { //Sube el brazo
+			movUpper_y -= 0.35f;
+			if (movUpper_y < -40.0f) {
+				stateArm = 13;
+			}
+		}
+		else if (stateArm == 13) { //Gira 200
+			turnBody += 0.35f;
+			if (turnBody > 200.0f) {
+				stateArm = 0;
+			}
+		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------
 	// PF - Rocket
 	//-----------------------------------------------------------------------------------------------------
 	if (aniRocket)
@@ -405,6 +518,78 @@ void animate(void)
 				stateRocket = 0;
 			}
 		}
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+	// PF - Paper
+	//-----------------------------------------------------------------------------------------------------
+	static float timePaper = 0.0f;
+	if (aniPaper)
+	{
+		if (statePaper > 0 && statePaper < 3) { //Permite el aleteo
+			timePaper += 0.015f;
+			movWL = sin(timePaper * 10.0f) * 20.0f;
+			movWR = movWL;
+		}
+
+		if (statePaper == 1) { //Lanzamiento suave
+			movP_z += 0.25f;
+			movP_y += 0.08f;
+			if (turnP_x > -15.0f) {
+				turnP_x -= 0.2f;
+			}
+			if (movP_y > 35.0f) {
+				statePaper = 2;
+			}
+		}
+
+		else if (statePaper == 2) { //Vuela y gira
+			turnP_y += 0.4f;
+			if (turnP_z < 15.0f) {
+				turnP_z += 0.2f;
+			}
+			if (turnP_x < 5.0f) {
+				turnP_x += 0.2f;
+			}
+
+			// Hace el giro
+			movP_z += cos(glm::radians(turnP_y)) * 0.25f;
+			movP_x += sin(glm::radians(turnP_y)) * 0.25f;
+			movP_y -= 0.015f;
+
+			if (turnP_y > 180.0f) {
+				statePaper = 3;
+			}
+		}
+
+		else if (statePaper == 3) { //Descenso
+			if (turnP_z > 0.0f) {
+				turnP_z -= 0.5f;
+			}
+			if (turnP_x < 8.0f) {
+				turnP_x += 0.2f; // Inclinación final
+			}
+
+			//Hace el giro
+			movP_z += cos(glm::radians(turnP_y)) * 0.15f;
+			movP_x += sin(glm::radians(turnP_y)) * 0.15f;
+			movP_y -= 0.08f;
+
+			// Si turnP_x es positivo (nariz abajo), necesitamos detenernos ANTES de y=0.
+			float alturaMinima = 1.5f;
+
+			if (movP_y <= alturaMinima) {
+				movP_y = alturaMinima;
+				statePaper = 4;
+			}
+		}
+
+		else if (statePaper == 4) {//Mantiene la rotación sin enterrarse 
+			movWL = 0.0f;
+			movWR = 0.0f;
+			statePaper = 0;
+		}
+
 	}
 
 }
@@ -634,6 +819,15 @@ int main() {
 	Model drone("resources/objects/Drone/Drone_v1.obj");
 
 	//-----------------------------------------------------------------------------------------------------
+	// PF - Robotic Arm
+	//-----------------------------------------------------------------------------------------------------
+	Model bodyArm("resources/objects/RoboticArm/BodyArm.obj");
+	Model upperArm("resources/objects/RoboticArm/UpperArm.obj");
+	Model foreArm("resources/objects/RoboticArm/ForeArm.obj");
+	Model handUpper("resources/objects/RoboticArm/HandUpper.obj");
+	Model handLow("resources/objects/RoboticArm/HandLow.obj");
+
+	//-----------------------------------------------------------------------------------------------------
 	// PF - Rocket
 	//-----------------------------------------------------------------------------------------------------
 	Model baseRocket("resources/objects/Rocket/Base.obj");
@@ -641,6 +835,13 @@ int main() {
 	Model support1("resources/objects/Rocket/Support1.obj");
 	Model support2("resources/objects/Rocket/Support2.obj");
 	Model support3("resources/objects/Rocket/Support3.obj");
+
+	//-----------------------------------------------------------------------------------------------------
+	// PF - Paper
+	//-----------------------------------------------------------------------------------------------------
+	Model bodyPaper("resources/objects/Paper/BodyPaper.obj");
+	Model leftWing("resources/objects/Paper/LeftWing.obj");
+	Model rightWing("resources/objects/Paper/RightWing.obj");
 
 	//Inicialización de KeyFrames
 	for (int i = 0; i < MAX_FRAMES; i++)
@@ -884,6 +1085,44 @@ int main() {
 		drone.Draw(staticShader);
 
 		//-----------------------------------------------------------------------------------------------------
+		// PF - Robotic Arm
+		//-----------------------------------------------------------------------------------------------------
+		//Scale global Robotic Arm
+		float scaleRobotic = 0.5f;
+		glm::vec3 vSR = glm::vec3(scaleRobotic);
+
+		//BodyArm
+		glm::mat4 modelBody = glm::translate(glm::mat4(1.0f), glm::vec3(movBody_x, movBody_y, movBody_z));
+		modelBody = glm::rotate(modelBody, glm::radians(turnBody), glm::vec3(0.0f, 1.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelBody, vSR));
+		bodyArm.Draw(staticShader);
+
+		//UpperArm
+		glm::mat4 modelUpper = glm::translate(modelBody, glm::vec3(-0.285f, 23.83f, 13.5f) * scaleRobotic);
+		modelUpper = glm::rotate(modelUpper, glm::radians(movUpper_y), glm::vec3(1.0f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelUpper, vSR));
+		upperArm.Draw(staticShader);
+
+		//ForeArm
+		//modelOp = glm::translate(tmpRoboticArm, glm::vec3(-0.085f, 39.648f, 31.1f));
+		glm::mat4 modelFore = glm::translate(modelUpper, glm::vec3(0.185f, 15.6f, 17.6f) * scaleRobotic);
+		modelFore = glm::rotate(modelFore, glm::radians(-movFore_y), glm::vec3(1.0f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelFore, vSR));
+		foreArm.Draw(staticShader);
+
+		//HandUpper
+		glm::mat4 modelHandUp = glm::translate(modelFore, glm::vec3(0.05f, -7.95f, 14.1f) * scaleRobotic);
+		modelHandUp = glm::rotate(modelHandUp, glm::radians(movHandU_y), glm::vec3(1.0f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelHandUp, vSR));
+		handUpper.Draw(staticShader);
+
+		//HandLow
+		glm::mat4 modelHandLow = modelOp = glm::translate(modelFore, glm::vec3(0.05f, -8.1f, 15.2f) * scaleRobotic);
+		modelHandLow = glm::rotate(modelHandLow, glm::radians(-movHandL_y), glm::vec3(1.0f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelHandLow, vSR));
+		handLow.Draw(staticShader);
+
+		//-----------------------------------------------------------------------------------------------------
 		// PF - Rocket
 		//-----------------------------------------------------------------------------------------------------
 		//Scale global Rocket
@@ -919,6 +1158,35 @@ int main() {
 		modelRocket = glm::rotate(modelRocket, glm::radians(turnRocket), glm::vec3(1.0f, 0.0f, 0.0f));
 		staticShader.setMat4("model", glm::scale(modelRocket, vSRocket));
 		rocket.Draw(staticShader);
+
+
+		//-----------------------------------------------------------------------------------------------------
+		// PF - Paper
+		//-----------------------------------------------------------------------------------------------------
+		//Scale global Paper
+		float scalePaper = 0.5f;
+		glm::vec3 vSP = glm::vec3(scalePaper);
+
+		//Body Paper
+		glm::mat4 modelBodyPaper = glm::translate(glm::mat4(1.0f), glm::vec3(movP_x, movP_y, movP_z));
+		modelBodyPaper = glm::rotate(modelBodyPaper, glm::radians(turnP_x), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelBodyPaper = glm::rotate(modelBodyPaper, glm::radians(turnP_y), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelBodyPaper = glm::rotate(modelBodyPaper, glm::radians(turnP_z), glm::vec3(1.0f, 0.0f, 1.0f));
+		staticShader.setMat4("model", glm::scale(modelBodyPaper, vSP));
+		bodyPaper.Draw(staticShader);
+
+		//Left Wing
+		glm::mat4 modelWL = glm::translate(modelBodyPaper, glm::vec3(-1.0f, 0.0f, 0.0f) * scalePaper);
+		modelWL = glm::rotate(modelWL, glm::radians(movWL), glm::vec3(1.0f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelWL, vSP));
+		leftWing.Draw(staticShader);
+
+		//Right Wing
+		glm::mat4 modelWR = glm::translate(modelBodyPaper, glm::vec3(1.0f, 0.0f, 0.0f) * scalePaper);
+		modelWR = glm::rotate(modelWR, glm::radians(movWR), glm::vec3(-1.305f, 0.0f, 0.0f));
+		staticShader.setMat4("model", glm::scale(modelWR, vSP));
+		rightWing.Draw(staticShader);
+
 
 		// Limitar el framerate a 60
 		deltaTime = SDL_GetTicks() - lastFrame; // time for full 1 loop
@@ -1034,6 +1302,29 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 	}
 
 	//-----------------------------------------------------------------------------------------------------
+	// PF - Robotic Arm
+	//-----------------------------------------------------------------------------------------------------
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+		aniRobotic ^= true;
+		if (stateArm == 0) {
+			stateArm = 1;
+		}
+	}
+
+	if (key == GLFW_KEY_F9 && action == GLFW_PRESS) {
+		aniRobotic = false;
+		stateArm = 0;
+		turnBody = 0.0f;
+		movBody_x = 0.0f;
+		movBody_y = 0.0f;
+		movBody_z = 0.0f;
+		movUpper_y = 0.0f;
+		movFore_y = 0.0f;
+		movHandU_y = 0.0f;
+		movHandL_y = 0.0f;
+	}
+
+	//-----------------------------------------------------------------------------------------------------
 	// PF - Rocket
 	//-----------------------------------------------------------------------------------------------------
 	if (key == GLFW_KEY_O && action == GLFW_PRESS) {
@@ -1054,6 +1345,29 @@ void my_input(GLFWwindow* window, int key, int scancode, int action, int mode)
 		movS1 = 0.0f;
 		movS2 = 0.0f;
 		movS3 = 0.0f;
+	}
+
+	//-----------------------------------------------------------------------------------------------------
+	// PF - Paper
+	//-----------------------------------------------------------------------------------------------------
+	if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+		aniPaper ^= true;
+		if (statePaper == 0) {
+			statePaper = 1;
+		}
+	}
+
+	if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
+		aniPaper = false;
+		statePaper = 0;
+		turnP_x = 0.0f;
+		turnP_y = 0.0f;
+		turnP_z = 0.0f;
+		movP_x = -20.0f;
+		movP_y = 9.0f;
+		movP_z = 3.0f;
+		movWL = 0.0f;
+		movWR = 0.0f;
 	}
 
 
